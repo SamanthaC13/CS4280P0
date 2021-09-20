@@ -5,12 +5,12 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"tree.h"
-//#include"node.h"
+#include"node.h"
 struct node_t* root=NULL;
 struct node_t* buildTree(char* filename)
 {
 	FILE* input;
-	struct node_t* root;
+	root=NULL;
 	input=fopen(filename,"r");
         if(input == NULL)
         {
@@ -18,43 +18,46 @@ struct node_t* buildTree(char* filename)
                 exit(1);
         }
         char word[20];
-	struct node_t* currentNode;
         while(fscanf(input,"%s",word)!=EOF)
         {
 		if(root==NULL)
 		{
-        		root=addNode(root,word);
+			printf("root-%c",word[0]);
+        		root=malloc(sizeof(struct node_t));
+			root->keyValue=word[0];
+			root->wordCount=1;
+			root->left=NULL;
+			root->right=NULL;
 		}
 		else
 		{
-			currentNode=addNode(root,word);
+			addNode(root,word);
 		}
         }
         fclose(input);		
 	return root;
 }
-struct node_t* addNode(struct node_t* nodePointer,char* word)
+void addNode(struct node_t* nodePointer,char* word)
 {
 	char firstLetter=word[0];
-	struct node_t *currentNode;
 	if(nodePointer==NULL)
 	{
 		printf("\n%c",firstLetter);
-                nodePointer=malloc(sizeof(node_t));
+                nodePointer=malloc(sizeof(struct node_t));
                 nodePointer->keyValue=word[0];
                 nodePointer->wordCount=1;
                 nodePointer->left=NULL;
                 nodePointer->right=NULL;
-                return nodePointer;         
+                return;         
 	}
         if(firstLetter<nodePointer->keyValue)
         {                 
 		printf("\n%c<-",firstLetter);
-          	currentNode=addNode(nodePointer->left,word);
+          	addNode(nodePointer->left,word);
         }
         if(firstLetter>nodePointer->keyValue)
         {
                  printf("\n%c->",firstLetter);
-                 currentNode=addNode(nodePointer->right,word);
+                 addNode(nodePointer->right,word);
 	}
 }
