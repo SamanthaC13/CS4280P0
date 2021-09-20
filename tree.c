@@ -6,7 +6,7 @@
 #include<stdlib.h>
 #include"tree.h"
 #include"node.h"
-struct node_t* root=NULL;
+struct node_t* root;
 struct node_t* buildTree(char* filename)
 {
 	FILE* input;
@@ -20,44 +20,76 @@ struct node_t* buildTree(char* filename)
         char word[20];
         while(fscanf(input,"%s",word)!=EOF)
         {
-		if(root==NULL)
-		{
-			printf("root-%c",word[0]);
-        		root=malloc(sizeof(struct node_t));
-			root->keyValue=word[0];
-			root->wordCount=1;
-			root->left=NULL;
-			root->right=NULL;
-		}
-		else
-		{
-			addNode(root,word);
-		}
+		root=addNode(root,word);
         }
-        fclose(input);		
+	printf("7");
+        fclose(input);
+	printf("#");
+	printf("%s",root->keyValue);
+	printf("$");		
 	return root;
 }
-void addNode(struct node_t* nodePointer,char* word)
+struct node_t* addNode(struct node_t* nodePointer,char* word)
 {
 	char firstLetter=word[0];
+	printf("\nfirstletter=%c",firstLetter);
 	if(nodePointer==NULL)
 	{
-		printf("\n%c",firstLetter);
                 nodePointer=malloc(sizeof(struct node_t));
+		nodePointer->words[0]=word;
                 nodePointer->keyValue=word[0];
                 nodePointer->wordCount=1;
                 nodePointer->left=NULL;
                 nodePointer->right=NULL;
-                return;         
+		printf("***Created Node***");	
+                return nodePointer;         
 	}
         if(firstLetter<nodePointer->keyValue)
         {                 
-		printf("\n%c<-",firstLetter);
-          	addNode(nodePointer->left,word);
+		printf("\nGoing to the left<-");
+          	nodePointer->left=addNode(nodePointer->left,word);
         }
         if(firstLetter>nodePointer->keyValue)
         {
-                 printf("\n%c->",firstLetter);
-                 addNode(nodePointer->right,word);
+                 printf("\nGoing to the right->",firstLetter);
+                 nodePointer->right=addNode(nodePointer->right,word);
+	}
+	//printf("\ncheacking for equal %c-%c",firstLetter,nodePointer->keyValue);
+	//if(firstLetter==nodePointer->keyValue)
+	//if(strcmp(firstLetter,nodePointer->keyValue)==0)
+	{
+	//	printf("\nAdding word to words in node");
+	//	printf("%d",nodePointer->wordCount);
+	//	nodePointer->words[nodePointer->wordCount]=word;
+	//	nodePointer->wordCount+=1;
 	}
 }
+
+/*
+	//FILE* output;
+	if(nodePointer==NULL)
+	{
+	//	fclose(output);
+		return;
+	}	
+	//output=fopen(filename,"a");
+	int i;
+	for(i=0;i<nodePointer->wordCount;i++)
+	{
+		printf("%*c%d:%-9s ",level*2,nodePointer->keyValue, level,nodePointer->words[i]);
+	//	fprintf(output,"%*c%d:%-9s",level*2,nodePointer->keyValue,nodePointer->words[i]);
+	}
+	printPreorder(nodePointer->left,level+1,filename);
+	printPreorder(nodePointer->right,level+1,filename);
+}
+void printInorder(struct node_t* root,int level)
+{
+
+
+}
+void printPostorder(struct node_t* root,int level)
+{
+
+
+
+}*/

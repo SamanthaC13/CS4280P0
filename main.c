@@ -33,7 +33,7 @@ int main(int argc, char**argv)
 	{
 		filename= strcat(argv[1],".f2021");
 	}
-
 	struct node_t* root;
-	root=buildTree(filename);			
+	root=buildTree(filename);
+	//printPreorder(root,0,filename);			
 }
