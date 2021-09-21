@@ -6,14 +6,30 @@
  */
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include"tree.h"
 #include"node.h"
 struct node_t* root;
-struct node_t* buildTree(char* filename)
+struct node_t* buildTree(char* inputFilename)
 {
+ 	char* outputFilename;
+	outputFilename=malloc(sizeof(char)*50);
+	strcpy(outputFilename,inputFilename);
+	if (strstr(inputFilename,".")!=NULL)
+	{
+		if(strstr(inputFilename,".fl2021")==NULL)
+		{
+			printf("Error! You have entered an incorrect file extension for input file please use an input file with the extension .f2021.\nAborting the Program");
+			exit(1);
+		}
+	}
+	else
+	{
+		inputFilename= strcat(inputFilename,".f2021");
+	}
 	FILE* input;
 	root=NULL;
-	input=fopen(filename,"r");
+	input=fopen(inputFilename,"r");
         if(input == NULL)
         {
         	printf("Error opening the file.Aborting the program\n");
@@ -38,9 +54,26 @@ struct node_t* buildTree(char* filename)
 		return root;
 	}	
         fclose(input);
-	printPreorder(root,"output.preorder");
-	printInorder(root,"output.inorder");
-	printPostorder(root,"output.postorder");	
+	if(outputFilename==NULL)
+	{
+		strcpy(outputFilename,"output");
+	}
+	char* preFile=malloc(sizeof(char)*50);
+	char* inFile=malloc(sizeof(char)*50);
+	char* postFile=malloc(sizeof(char)*50);
+	strcpy(preFile,outputFilename);
+	strcpy(inFile,outputFilename);
+	strcpy(postFile,outputFilename);
+	strcat(preFile,".preorder");
+	strcat(inFile,".inorder");
+	strcat(postFile,".postorder");
+	printPreorder(root,preFile);
+	printInorder(root,inFile);
+	printPostorder(root,postFile);	
+	free(outputFilename);
+	free(preFile);
+	free(inFile);
+	free(postFile);
 	return root;
 }
 struct node_t* addNode(struct node_t* nodePointer,char* word)
@@ -50,7 +83,8 @@ struct node_t* addNode(struct node_t* nodePointer,char* word)
 	{
                 nodePointer=malloc(sizeof(struct node_t));
 		nodePointer->wordList=malloc(sizeof(struct word_t));
-		nodePointer->wordList->word=word;
+		nodePointer->wordList->word=malloc(sizeof(char)*25);
+		strcpy(nodePointer->wordList->word,word);
 		nodePointer->wordList->nextWord=NULL;
                 nodePointer->keyValue=word[0];
                 nodePointer->wordCount=1;
@@ -68,22 +102,29 @@ struct node_t* addNode(struct node_t* nodePointer,char* word)
 	}
 	else if(firstLetter==nodePointer->keyValue)
 	{
-		int i;
+		int i=0;
 		struct word_t* wordP;
 		wordP=nodePointer->wordList;
-		for(i=0;i<nodePointer->wordCount;i++)
+		while(wordP!=NULL)
 		{
-			if(strcmp(word,nodePointer->wordList->word)==0)
+			if(strcmp(word,wordP->word)==0)
 			{
 				break;
 			}
-			wordP=nodePointer->wordList->nextWord;
-		}
-		if(i==(nodePointer->wordCount-1))
+			wordP=wordP->nextWord;
+			i++;
+		} 
+		if(i==nodePointer->wordCount)
 		{
+			wordP=nodePointer->wordList;
+			for(i=0;i<(nodePointer->wordCount-1);i++)
+			{
+				wordP=wordP->nextWord;
+			}
 			struct word_t* temp;	
 			temp=malloc(sizeof(struct word_t));
-			temp->word=word;
+			temp->word=malloc(sizeof(char)*25);
+			strcpy(temp->word,word);
 			temp->nextWord=NULL;
 			wordP->nextWord=temp;
 			nodePointer->wordCount+=1;
@@ -95,22 +136,30 @@ struct node_t* addNode(struct node_t* nodePointer,char* word)
 void printPreorder(struct node_t* nodeP,char* filename)
 {
 	FILE* output;
-	output=fopen(filename,"aw");
+	output=fopen(filename,"w");
 	if(output==NULL)
 	{
 		fprintf(stderr,"PreOrder Output file failed to open. Aborting Program.");
 		exit(1);
 	}
-	traversePreorder(nodeP,output);
+	traversePreorder(nodeP,output,0);
 	fclose(output);
+	free(filename);
 }
-void traversePreorder(struct node_t* nodeP,FILE* output)
+void traversePreorder(struct node_t* nodeP,FILE* output,int level)
 {
 	if(nodeP!=NULL)
 	{
-		fprintf(output,"\n%c",nodeP->keyValue);
-		traversePreorder(nodeP->left,output);
-		traversePreorder(nodeP->right,output);
+		struct word_t* temp;
+		temp=nodeP->wordList;
+		fprintf(output,"\n%*c%d:%c  ",level*2,' ',level,nodeP->keyValue);
+		while(temp!=NULL)
+		{
+			fprintf(output,"-%s",temp->word);
+			temp=temp->nextWord;
+		}
+		traversePreorder(nodeP->left,output,level+1);
+		traversePreorder(nodeP->right,output,level+1);
 	}
 	
 }
@@ -123,16 +172,24 @@ void printInorder(struct node_t* nodeP,char* filename)
 		fprintf(stderr,"Inorder Output file failed to open. Aborting Program");
 		exit(1);
 	}
-	traverseInorder(nodeP,output);
+	traverseInorder(nodeP,output,0);
 	fclose(output);
+	free(filename);
 }
-void traverseInorder(struct node_t* nodeP,FILE* output)
+void traverseInorder(struct node_t* nodeP,FILE* output, int level)
 {
 	if(nodeP!=NULL)
 	{
-		traverseInorder(nodeP->left,output);
-		fprintf(output,"\n%c",nodeP->keyValue);
-		traverseInorder(nodeP->right,output);
+		traverseInorder(nodeP->left,output,level+1);
+		struct word_t* temp;
+		temp=nodeP->wordList;
+		fprintf(output,"\n%*c%d:%c  ",level*2,' ',level,nodeP->keyValue);
+		while(temp!=NULL)
+		{
+			fprintf(output,"-%s",temp->word);
+			temp=temp->nextWord;
+		}
+		traverseInorder(nodeP->right,output,level+1);
 	}	
 }
 void printPostorder(struct node_t* nodeP,char* filename)
@@ -144,15 +201,23 @@ void printPostorder(struct node_t* nodeP,char* filename)
 		fprintf(stderr,"PostOrder Output file failed to open. Aborting Program");
 		exit(1);
 	}
-	traversePostorder(nodeP,output);
+	traversePostorder(nodeP,output,0);
 	fclose(output);
+	free(filename);
 }
-void traversePostorder(struct node_t* nodeP,FILE*output)
+void traversePostorder(struct node_t* nodeP,FILE*output,int level)
 {
 	if(nodeP!=NULL)
 	{
-		traversePostorder(nodeP->left,output);
-		traversePostorder(nodeP->right,output);
-		fprintf(output,"\n%c",nodeP->keyValue);
+		traversePostorder(nodeP->left,output,level+1);
+		traversePostorder(nodeP->right,output,level+1);
+		struct word_t* temp;
+		temp=nodeP->wordList;
+		fprintf(output,"\n%*c%d:%c  ",level*2,' ',level,nodeP->keyValue);
+		while(temp!=NULL)
+		{
+			fprintf(output,"-%s",temp->word);
+			temp=temp->nextWord;
+		}
 	}
 } 
