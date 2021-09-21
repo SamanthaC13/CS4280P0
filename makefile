@@ -5,10 +5,10 @@ OBJECTS = tree.o main.o
 DEP = tree.h node.h
 TARGET = P0
 $(TARGET) : $(OBJECTS)
-	$(CC) $(CFALGS)-o $@ $^
+	$(CC) $(CFLAGS)-o $@ $^
 main.o :  tree.c tree.h
-	$(CC) $(CFALGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 tree.o : main.c tree.h
-	$(CC) $(CFALGS) -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o $@ $< 
 clean:
 	rm -f *.o  
