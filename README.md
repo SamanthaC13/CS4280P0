@@ -1,1 +1,1 @@
-# CS4280P0
+This program is compiled using a makefile and the make command. The excutable is P0.

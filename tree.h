@@ -1,5 +1,5 @@
-//extern struct node_t* root;
-struct node_t* buildTree(char*);
+//includes functino declarations for a functions in tree.c
+struct node_t* buildTree(char*,int);
 struct node_t* addNode(struct node_t*,char*);
 void printPreorder(struct node_t*,char*);
 void printInorder(struct node_t*,char*);
