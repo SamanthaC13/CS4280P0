@@ -8,7 +8,6 @@
 #include<stdlib.h>
 #include"tree.h"
 #include"node.h"
-void printNode(struct node_t*);
 struct node_t* root;
 struct node_t* buildTree(char* filename)
 {
@@ -31,7 +30,6 @@ struct node_t* buildTree(char* filename)
 		else
 		{
 			temp=addNode(root,word);
-			fprintf(stderr,"\n%c",root->keyValue);
 		}
         }
 	if(root==NULL)
@@ -40,19 +38,14 @@ struct node_t* buildTree(char* filename)
 		return root;
 	}	
         fclose(input);
-	fprintf(stderr,"%c",root->keyValue);
-	fprintf(stderr,"\nPreOrder:");
-	printPreorder(root);
-	fprintf(stderr,"\nInOrder:");
-	printInorder(root);
-	fprintf(stderr,"\nPostOrder:");
-	printPostorder(root);	
+	printPreorder(root,"output.preorder");
+	printInorder(root,"output.inorder");
+	printPostorder(root,"output.postorder");	
 	return root;
 }
 struct node_t* addNode(struct node_t* nodePointer,char* word)
 {
 	char firstLetter=word[0];
-	fprintf(stderr,"\nfirstletter=%c",firstLetter);
 	if(nodePointer==NULL)
 	{
                 nodePointer=malloc(sizeof(struct node_t));
@@ -62,21 +55,16 @@ struct node_t* addNode(struct node_t* nodePointer,char* word)
                 nodePointer->keyValue=word[0];
                 nodePointer->wordCount=1;
                 nodePointer->left=NULL;
-                nodePointer->right=NULL;
-		fprintf(stderr,"***Created Node***");	
+                nodePointer->right=NULL;	
                 return nodePointer;         
 	}
         if(firstLetter<nodePointer->keyValue)
         {                 
-		fprintf(stderr,"\nGoing to the left<-");
           	nodePointer->left=addNode(nodePointer->left,word);
-		printNode(nodePointer);
         }
         else if(firstLetter>nodePointer->keyValue)
         {
-                fprintf(stderr,"\nGoing to the right->",firstLetter);
                 nodePointer->right=addNode(nodePointer->right,word);
-		printNode(nodePointer);
 	}
 	else if(firstLetter==nodePointer->keyValue)
 	{
@@ -104,54 +92,67 @@ struct node_t* addNode(struct node_t* nodePointer,char* word)
 	}
 	return nodePointer;
 }
-void printNode(struct node_t* nodeP)
+void printPreorder(struct node_t* nodeP,char* filename)
 {
-	fprintf(stderr,"\nKey:%c",nodeP->keyValue);
-	fprintf(stderr,"\nLeft:%u",nodeP->left);
-	fprintf(stderr,"\nRight:%u",nodeP->right);
+	FILE* output;
+	output=fopen(filename,"aw");
+	if(output==NULL)
+	{
+		fprintf(stderr,"PreOrder Output file failed to open. Aborting Program.");
+		exit(1);
+	}
+	traversePreorder(nodeP,output);
+	fclose(output);
 }
-void printPreorder(struct node_t* nodeP)
+void traversePreorder(struct node_t* nodeP,FILE* output)
 {
 	if(nodeP!=NULL)
 	{
-		fprintf(stderr,"\n%c",nodeP->keyValue);
-		printPreorder(nodeP->left);
-		printPreorder(nodeP->right);
+		fprintf(output,"\n%c",nodeP->keyValue);
+		traversePreorder(nodeP->left,output);
+		traversePreorder(nodeP->right,output);
 	}
 	
 }
-/*
-	//FILE* output;
-	if(nodePointer==NULL)
+void printInorder(struct node_t* nodeP,char* filename)
+{
+	FILE* output;
+	output=fopen(filename,"w");
+	if(output==NULL)
 	{
-	//	fclose(output);
-		return;
-	}	
-	//output=fopen(filename,"a");
-	int i;
-	for(i=0;i<nodePointer->wordCount;i++)
-	{
-		printf("%*c%d:%-9s ",level*2,nodePointer->keyValue, level,nodePointer->words[i]);
-	//	fprintf(output,"%*c%d:%-9s",level*2,nodePointer->keyValue,nodePointer->words[i]);
+		fprintf(stderr,"Inorder Output file failed to open. Aborting Program");
+		exit(1);
 	}
-	printPreorder(nodePointer->left,level+1,filename);
-	printPreorder(nodePointer->right,level+1,filename);
-}*/
-void printInorder(struct node_t* nodeP)
+	traverseInorder(nodeP,output);
+	fclose(output);
+}
+void traverseInorder(struct node_t* nodeP,FILE* output)
 {
 	if(nodeP!=NULL)
 	{
-		printInorder(nodeP->left);
-		fprintf(stderr,"\n%c",nodeP->keyValue);
-		printInorder(nodeP->right);
+		traverseInorder(nodeP->left,output);
+		fprintf(output,"\n%c",nodeP->keyValue);
+		traverseInorder(nodeP->right,output);
 	}	
 }
-void printPostorder(struct node_t* nodeP)
+void printPostorder(struct node_t* nodeP,char* filename)
+{
+	FILE* output;
+	output=fopen(filename,"w");
+	if(output==NULL)
+	{
+		fprintf(stderr,"PostOrder Output file failed to open. Aborting Program");
+		exit(1);
+	}
+	traversePostorder(nodeP,output);
+	fclose(output);
+}
+void traversePostorder(struct node_t* nodeP,FILE*output)
 {
 	if(nodeP!=NULL)
 	{
-		printPostorder(nodeP->left);
-		printPostorder(nodeP->right);
-		fprintf(stderr,"\n%c",nodeP->keyValue);
+		traversePostorder(nodeP->left,output);
+		traversePostorder(nodeP->right,output);
+		fprintf(output,"\n%c",nodeP->keyValue);
 	}
 } 
